@@ -1,0 +1,95 @@
+name: 'Create versioning pull request'
+description: 'Create a pull request for increasing the node package version.'
+inputs:
+  github-token:
+    description: >-
+      The GitHub automatically created secret to use in your workflow for authentications.
+    required: true
+  base-branch:
+    description: >-
+      The base branch that the pull request will be going to.
+    required: true
+  head-branch:
+    description: >-
+      The head branch which the pull request is taking from.
+    required: true
+  pr-fail-if-exist:
+    description: >-
+      A boolean indicator for the behavior of re-issuing a pull request with the same head and
+       base branch. If set 'true', the action will fail for existing open pr.
+    required: false
+    default: 'true'
+  pr-create-draft:
+    description: >-
+      A boolean indicator for whether to create a draft pull request or actual one.
+    required: false
+    default: 'false'
+  pr-template-uri:
+    description: >-
+      The uri of the template of pre-configured values for the pull request to be used.
+      See the README.md on the github repo for more information.
+    required: false
+    default: '.github/workflows/templates/version-pr.yml'
+  pr-title:
+    description: >-
+      The title for the pull request. If non-empty value is specified,
+       the value here will be used and override the title property value in pr-template-uri.
+    required: false
+  pr-description:
+    description: >-
+      The description for the pull request. If non-empty value is specified,
+       the value here will be used and override the description property value in pr-template-uri.
+    required: false
+  pr-reviewers:
+    description: >-
+      A comma-separated list of the reviewers (usernames) for the pull request.
+      If pr-template-uri is also used, this parameter will override the 'reviewers' field in the template.
+      Giving a single comma as the value here, i.e. ',' can override and disable this setting.
+    required: false
+  pr-team-reviewers:
+    description: >-
+      A comma-separated list of the team reviewers (usernames) for the pull request.
+      If pr-template-uri is also used, this parameter will override the 'team reviewers' field in the template.
+      Giving a single comma as the value here, i.e. ',' can override and disable this setting.
+    required: false
+  pr-assignees:
+    description: >-
+      A comma-separated list of the assignees (usernames) for the pull request.
+      If pr-template-uri is also used, this parameter will override the 'assignees' field in the template.
+      Giving a single comma as the value here, i.e. ',' can override and disable this setting.
+      Only users with push access can add assignees to an issue. Assignees are silently ignored otherwise.
+    required: false
+  pr-labels:
+    description: >-
+      A comma-separated list of the labels for the pull request.
+      If pr-template-uri is also used, this parameter will override the 'labels' field in the template.
+      Giving a single comma as the value here, i.e. ',' can override and disable this setting.
+    required: false
+outputs:
+  base-branch:
+    description: The base branch for this pull request.
+  head-branch:
+    description: The head branch for this pull request.
+  base-version:
+    description: The version found in the package.json on the base branch.
+  head-version:
+    description: The version found in the package.json on the head branch.
+  is-prerelease:
+    description: A boolean indicator for the intension for the GitHub release 'prerelease' flag.
+  is-pr-draft:
+    description: A boolean indicator for the draft pull request.
+  pull-request-url:
+    description: The new pull request url.
+  pull-request-number:
+    description: The new pull request number.
+  assignees:
+    description: The comma-separated list of assignees to the new pull request.
+  reviewers:
+    description: The comma-separated list of reviewers to the new pull request.
+  team-reviewers:
+    description: The comma-separated list of team reviewers to the new pull request.
+  labels:
+    description: The comma-separated list of labels to the new pull request.
+runs:
+  using: 'node12'
+  main: 'dist/bin/index.js'
