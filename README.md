@@ -152,7 +152,7 @@ Some place holders are available for the content placement in the pull request t
 
 ## Input precedences
 
-There are precedences for the input values to use in pull request title, description, assignees, reviewers, and labels. Precedences are listed in the ascending order. The table below uses *title* as an example, and these precedences apply to title, description, assignees, reviewers, and labels.
+There are precedences for the input values to use in pull request *title*, *description*, *assignees*, *reviewers*, and *labels*. Precedences are listed in the ascending order. The table below uses *title* as an example, and these precedences apply to title, description, assignees, reviewers, and labels.
 
 | No. | Condition | Value to use |
 |-----|-----------|--------------|
@@ -162,7 +162,7 @@ There are precedences for the input values to use in pull request title, descrip
 | 4    | both action input *pr-title* and *pr-template-uri* are empty | look for node value *pull-request.title* in the *.github/workflows/templates/version-pr.yml* |
 | 5    | condition 3, or 4 met but *.github/workflows/templates/version-pr.yml* doesn't exist | '' (empty string) |
 
-In some situations, even though the `assignees`, `reviewers`, or `labels` have been set in the pre-configuratioin template, it can still be able to unset them by providing `,` (a single comma) as the value for their corresponding action input.
+In some situations, even though the `assignees`, `reviewers`, or `labels` have been set in the pre-configuration template, it can still be able to unset them by providing `,` (a single comma) as the value for their corresponding action input.
 
 However, if `title` or `description` is set in the pre-configuration template, they cannot be reset to '' (emtpy string).
 ## Support
