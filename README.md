@@ -121,6 +121,50 @@ The following table contains the outputs of this action.
 | team-reviewers         | The comma-separated list of team-reviewers to the new pull request. |
 | labels         | The comma-separated list of labels to the new pull request. |
 
+## PR template
+
+The PR template is a yaml file that stores pre-configurations for the pull request and can be referenced in a handy way. It requires the template yaml file to be located in the same project where the GitHub workflow uses this action.
+
+### Template structure
+
+```yaml
+pull-request: # the node for the pull request pre-configurations
+  title: # the title of the pull request
+  description: # the description of the pull request
+  assignees: # array of GitHub login to be added as assignees
+  reviewers: # array of GitHub login to be added as reviewers
+  team-reviewers: # array of GitHub login to be added as team reviewers
+  labels: # array of string literal to be added as labels. Each string can include spaces.
+```
+
+### Template place holders
+
+Some place holders are available for the content placement in the pull request title and description.
+
+| Symbol                | Description                 | Examples             |
+|-----------------------|-------------------------|---------------------|
+| ${base-branch}        | name of the base branch | main |
+| ${base-version}        | version number extracted from the package.json in the top level directory of the base branch | 1.0.0 |
+| ${head-branch}        | name of the head branch | rel_1.0.1 |
+| ${head-version}        | version number extracted from the package.json in the top level directory of the head branch | 1.0.1 |
+| ${is-prerelease}        | boolean indicator for whether the ${head-version} is a semver prerelease format or not | true, false |
+| ${is-draft-pr}        | boolean indicator for whether the pull request should be a draft or not | true, false |
+
+## Input precedences
+
+There are precedences for the input values to use in pull request title, description, assignees, reviewers, and labels. Precedences are listed in the ascending order. The table below uses *title* as an example, and these precedences apply to title, description, assignees, reviewers, and labels.
+
+| No. | Condition | Value to use |
+|-----|-----------|--------------|
+| 1    | action input *pr-title* is non-empty | action input value *pr-title* |
+| 2    | *pr-title* is empty, action input *pr-template-uri* is non-empty | node value *pull-request.title* |
+| 3    | both action input *pr-title* and *pr-template-uri* are empty | '' (empty string) |
+| 4    | condition 2 met, but action input *pr-template-uri* isn't a valid pr-template yaml file | look for node value *pull-request.title* in the *.github/workflows/templates/version-pr.yml* |
+| 5    | condition 4 met but *.github/workflows/templates/version-pr.yml* doesn't exist | '' (empty string) |
+
+In some situations, even though the `assignees`, `reviewers`, or `labels` have been set in the pre-configuratioin template, it can still be able to unset them by providing `,` (a single comma) as the value for their corresponding action input.
+
+However, if `title` or `description` is set in the pre-configuration template, they cannot be reset to '' (emtpy string).
 ## Support
 
 Fortinet-provided scripts in this and other GitHub projects do not fall under the regular Fortinet technical support scope and are not supported by FortiCare Support Services.
