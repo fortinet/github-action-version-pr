@@ -1,11 +1,11 @@
 # (GitHub Action) Version PR
 
 [![GitHub Release](https://img.shields.io/github/package-json/v/fortinet/github-action-version-pr)]()
-[![Node version](https://img.shields.io/badge/node-12.x-brightgreen.svg?style=flat)]()
+[![Node version](https://img.shields.io/badge/node-^12.x-brightgreen.svg?style=flat)]()
 
 A GitHub Action that creates a pull request for versioning.
 
-# Usage
+## Usage
 
 ```yaml
 - uses: fortinet/github-action-version-pr@main
@@ -79,12 +79,54 @@ A GitHub Action that creates a pull request for versioning.
     pr-labels: ''
 ```
 
-# Support
+## Inputs
+
+The following table contains the inputs this action accepts. Please find the description for each in the [action.yml](action.yml).
+
+| Name                | Required | Type     | Default value                        |
+|---------------------|----------|----------|--------------------------------------|
+| github-token        | Yes      | string   |                                      |
+| base-branch         | Yes      | string   |                                      |
+| head-branch         | Yes      | string   |                                      |
+| pr-fail-if-exist         | No       | string   | false                                 |
+| pr-create-draft         | No       | string   | false                                 |
+| pr-template-uri         | No       | string   | .github/workflows/templates/version-pr.yml     |
+| pr-title              | No       | string   |                                      |
+| pr-description      | No       | string   |                                      |
+| pr-reviewers           | No       | csv (*1)   |                                      |
+| pr-team-reviewers           | No       | csv    |                                      |
+| pr-assignees           | No       | csv    |                                      |
+| pr-labels           | No       | csv    |                                      |
+
+note:
+
+*1: csv stands for comma separated values
+
+## Outputs
+
+The following table contains the outputs of this action.
+
+| Name                | Description                        |
+|---------------------|--------------------------------------|
+| base-branch         | The same value as the input.         |
+| base-version        | The version extracted from the top level package.json in the base-branch. |
+| head-branch         | The same value as the input.         |
+| head-version        | The version extracted from the top level package.json in the head-branch. |
+| is-prerelease       | A boolean indicator for whether the version is considered as a prerelease or not. |
+| is-draft-pr         | A boolean indicator for whether it is a draft pull request or actual one. |
+| pull-request-number         | The new pull request number. |
+| pull-request-url         | The new pull request url. |
+| assignees         | The comma-separated list of assignees to the new pull request. |
+| reviewers         | The comma-separated list of reviewers to the new pull request. |
+| team-reviewers         | The comma-separated list of team-reviewers to the new pull request. |
+| labels         | The comma-separated list of labels to the new pull request. |
+
+## Support
 
 Fortinet-provided scripts in this and other GitHub projects do not fall under the regular Fortinet technical support scope and are not supported by FortiCare Support Services.
 For direct issues, please refer to the [Issues](https://github.com/fortinet/github-action-version-pr/issues) tab of this GitHub project.
 For other questions related to this project, contact [github@fortinet.com](mailto:github@fortinet.com).
 
-# License
+## License
 
 [License](./LICENSE) © Fortinet Technologies. All rights reserved.

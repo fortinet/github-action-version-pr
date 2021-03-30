@@ -16,7 +16,7 @@
     "url": "git+https://github.com/fortinet/github-actions-version-pr.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "fortinet",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/fortinet/github-actions-version-pr/issues"
