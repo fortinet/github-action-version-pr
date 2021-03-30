@@ -48,7 +48,7 @@ jobs:
     steps:
       - name: versioning pr
         id: version-pr
-        uses: fortinet/github-action-version-pr@main
+        uses: fortinet/github-action-version-pr@1.0.0
         with:
           base-branch: ${{ github.event.inputs.base-branch }}
           head-branch: ${{ github.event.inputs.head-branch }}

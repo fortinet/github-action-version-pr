@@ -8,7 +8,7 @@ A GitHub Action that creates a pull request for versioning.
 ## Usage
 
 ```yaml
-- uses: fortinet/github-action-version-pr@main
+- uses: fortinet/github-action-version-pr@1.0.0
   with:
     # The GitHub automatically created secret to use in your workflow for authentications.
     # see: https://docs.github.com/en/actions/reference/authentication-in-a-workflow
@@ -123,7 +123,7 @@ The following table contains the outputs of this action.
 
 ## PR template
 
-The PR template is a yaml file that stores pre-configurations for the pull request and can be referenced in a handy way. It requires the template yaml file to be located in the same project where the GitHub workflow uses this action.
+The PR template is a yaml file that stores pre-configurations for the pull request and can be referenced in a handy way. If provided, it requires the template yaml file to be located in the same project where the GitHub workflow uses this action.
 
 ### Template structure
 
@@ -157,10 +157,10 @@ There are precedences for the input values to use in pull request title, descrip
 | No. | Condition | Value to use |
 |-----|-----------|--------------|
 | 1    | action input *pr-title* is non-empty | action input value *pr-title* |
-| 2    | *pr-title* is empty, action input *pr-template-uri* is non-empty | node value *pull-request.title* |
-| 3    | both action input *pr-title* and *pr-template-uri* are empty | '' (empty string) |
-| 4    | condition 2 met, but action input *pr-template-uri* isn't a valid pr-template yaml file | look for node value *pull-request.title* in the *.github/workflows/templates/version-pr.yml* |
-| 5    | condition 4 met but *.github/workflows/templates/version-pr.yml* doesn't exist | '' (empty string) |
+| 2    | *pr-title* is empty, action input *pr-template-uri* is non-empty | node value *pull-request.title* in the *pr-template-uri* yaml file |
+| 3    | condition 2 met, but action input *pr-template-uri* isn't a valid pr-template yaml file | look for node value *pull-request.title* in the *.github/workflows/templates/version-pr.yml* |
+| 4    | both action input *pr-title* and *pr-template-uri* are empty | look for node value *pull-request.title* in the *.github/workflows/templates/version-pr.yml* |
+| 5    | condition 3, or 4 met but *.github/workflows/templates/version-pr.yml* doesn't exist | '' (empty string) |
 
 In some situations, even though the `assignees`, `reviewers`, or `labels` have been set in the pre-configuratioin template, it can still be able to unset them by providing `,` (a single comma) as the value for their corresponding action input.
 
