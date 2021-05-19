@@ -162,7 +162,7 @@ async function main(): Promise<void> {
         const prListResponse = await octokit.pulls.list({
             owner: owner,
             repo: repo,
-            head: headBranch,
+            head: `${owner}:${headBranch}`,
             base: baseBranch,
             sort: 'updated', // will sort all pr by updated time
             direction: 'desc', // will sort with latest ones on top
