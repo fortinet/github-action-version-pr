@@ -241,18 +241,39 @@ async function main(): Promise<void> {
         core.setOutput('assignees', assignees.length && assignees.join(',') || '');
 
         // add reviewers if needed
-        if (prReviewers.length || prTeamReviewers.length) {
-            await octokit.pulls.requestReviewers({
-                owner: owner,
-                repo: repo,
-                pull_number: pullRequest.number,
-                reviewers: prReviewers,
-                team_reviewers: prTeamReviewers
-            });
+        const addedReviewers: string[] = [];
+        if (prReviewers.length) {
+            await Promise.all(prReviewers.map(reviewer => {
+                return octokit.pulls.requestReviewers({
+                    owner: owner,
+                    repo: repo,
+                    pull_number: pullRequest.number,
+                    reviewers: [reviewer]
+                }).then(() => {
+                    addedReviewers.push(reviewer);
+                }).catch(error => {
+                    console.warn(`Unable to add reviewer: ${reviewer}. Reason:${JSON.stringify(error)}`);
+                });
+            }));
+        }
+        const addedTeamReviewers: string[] = [];
+        if (prTeamReviewers.length) {
+            await Promise.all(prTeamReviewers.map(teamReviewer => {
+                return octokit.pulls.requestReviewers({
+                    owner: owner,
+                    repo: repo,
+                    pull_number: pullRequest.number,
+                    reviewers: [teamReviewer]
+                }).then(() => {
+                    addedTeamReviewers.push(teamReviewer);
+                }).catch(error => {
+                    console.warn(`Unable to add team reviewer: ${teamReviewer}. Reason:${JSON.stringify(error)}`);
+                });
+            }));
         }
         // output the actual reviewers and / or team reviewers.
-        core.setOutput('reviewers', prReviewers.length && prReviewers.join(',') || '');
-        core.setOutput('team-reviewers', prTeamReviewers.length && prTeamReviewers.join(',') || '');
+        core.setOutput('reviewers', addedReviewers.length && addedReviewers.join(',') || '');
+        core.setOutput('team-reviewers', addedTeamReviewers.length && addedTeamReviewers.join(',') || '');
 
         // add labels if needed
         if (prLabels.length) {
