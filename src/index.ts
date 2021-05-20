@@ -170,7 +170,6 @@ async function main(): Promise<void> {
 
         // ASSERT: the 1st pr is the latest updated one (either open or closed)
         let pullRequest = prListResponse.data.length && prListResponse.data[0];
-
         // additional checking if need to check fail-if-exist
         console.log('Parameter [pr-fail-if-exist] is set: ' +
             `${prFailIfExist === 'true' && 'true' || 'false'}`);
@@ -181,6 +180,7 @@ async function main(): Promise<void> {
         }
         // if an open pr is found, update it. otherwise, create one
         if (pullRequest) {
+            console.log(`pull request (number: ${pullRequest.number}}) found. update it.`);
             const prUpdateResponse = await octokit.pulls.update({
                 owner: owner,
                 repo: repo,
@@ -193,6 +193,7 @@ async function main(): Promise<void> {
         }
         // create a pr with the above title and description.
         else {
+            console.log(`pull request not found. create one.`);
             const prCreateResponse = await octokit.pulls.create({
                 owner: owner,
                 repo: repo,
@@ -204,12 +205,14 @@ async function main(): Promise<void> {
             });
             pullRequest = prCreateResponse.data;
         }
+        console.log(`new pull request (number: ${pullRequest.number}) created.`);
         core.setOutput('pull-request-number', pullRequest.number);
         core.setOutput('pull-request-url', pullRequest.url);
 
         // add assignee if needed
         const assignees: string[] = [];
         if (prAssignees.length) {
+            console.log(`adding assignees: ${prAssignees.join(',')}`);
             // check if a user can be assigned, filter non-assignable users
             // see: https://octokit.github.io/rest.js/v18#issues-check-user-can-be-assigned
             await Promise.allSettled(
@@ -236,6 +239,7 @@ async function main(): Promise<void> {
                     assignees: prAssignees
                 });
             }
+            console.log(`assignees added: ${assignees.join(',')}`);
         }
         // output the actual assignees.
         core.setOutput('assignees', assignees.length && assignees.join(',') || '');
@@ -243,33 +247,52 @@ async function main(): Promise<void> {
         // add reviewers if needed
         const addedReviewers: string[] = [];
         if (prReviewers.length) {
-            await Promise.all(prReviewers.map(reviewer => {
-                return octokit.pulls.requestReviewers({
-                    owner: owner,
-                    repo: repo,
-                    pull_number: pullRequest.number,
-                    reviewers: [reviewer]
-                }).then(() => {
-                    addedReviewers.push(reviewer);
-                }).catch(error => {
+            console.log(`adding reviewers: ${prReviewers.join(',')}`);
+            for (const reviewer of prReviewers) {
+                console.log(`adding reviewer: ${reviewer}`);
+                // NOTE: the octakit does not or may not properly handle error using the Promise.reject()
+                // instead, it directly throws errors.
+                // Such error has to be caught by a try-catch block
+                try {
+                    await octokit.pulls.requestReviewers({
+                        owner: owner,
+                        repo: repo,
+                        pull_number: pullRequest.number,
+                        reviewers: [reviewer]
+                    }).then(() => {
+                        addedReviewers.push(reviewer);
+                    }).catch(error => {
+                        console.warn(`Unable to add reviewer: ${reviewer}. Reason:${JSON.stringify(error)}`);
+                    });
+                } catch (error) {
                     console.warn(`Unable to add reviewer: ${reviewer}. Reason:${JSON.stringify(error)}`);
-                });
-            }));
+                }
+            }
+            console.log(`reviewers added: ${assignees.join(',')}`);
         }
         const addedTeamReviewers: string[] = [];
         if (prTeamReviewers.length) {
-            await Promise.all(prTeamReviewers.map(teamReviewer => {
-                return octokit.pulls.requestReviewers({
-                    owner: owner,
-                    repo: repo,
-                    pull_number: pullRequest.number,
-                    reviewers: [teamReviewer]
-                }).then(() => {
-                    addedTeamReviewers.push(teamReviewer);
-                }).catch(error => {
+            console.log(`adding team reviewers: ${prTeamReviewers.join(',')}`);
+            for (const teamReviewer of prReviewers) {
+                // NOTE: the octakit does not or may not properly handle error using the Promise.reject()
+                // instead, it directly throws errors.
+                // Such error has to be caught by a try-catch block
+                try {
+                    await octokit.pulls.requestReviewers({
+                        owner: owner,
+                        repo: repo,
+                        pull_number: pullRequest.number,
+                        reviewers: [teamReviewer]
+                    }).then(() => {
+                        addedTeamReviewers.push(teamReviewer);
+                    }).catch(error => {
+                        console.warn(`Unable to add team reviewer: ${teamReviewer}. Reason:${JSON.stringify(error)}`);
+                    });
+                } catch (error) {
                     console.warn(`Unable to add team reviewer: ${teamReviewer}. Reason:${JSON.stringify(error)}`);
-                });
-            }));
+                }
+            }
+            console.log(`team reviewers added: ${assignees.join(',')}`);
         }
         // output the actual reviewers and / or team reviewers.
         core.setOutput('reviewers', addedReviewers.length && addedReviewers.join(',') || '');
@@ -277,16 +300,28 @@ async function main(): Promise<void> {
 
         // add labels if needed
         if (prLabels.length) {
-            await octokit.issues.addLabels({
-                owner: owner,
-                repo: repo,
-                issue_number: pullRequest.number,
-                labels: prLabels
-            });
+            console.log(`adding labels: ${prLabels.join(',')}`);
+            // NOTE: the octakit does not or may not properly handle error using the Promise.reject()
+            // instead, it directly throws errors.
+            // Such error has to be caught by a try-catch block
+            try {
+                await octokit.issues.addLabels({
+                    owner: owner,
+                    repo: repo,
+                    issue_number: pullRequest.number,
+                    labels: prLabels
+                }).catch(error => {
+                    console.error(`Unable to add labels. Reason: ${JSON.stringify(error)}`);
+                });
+            } catch (error) {
+                console.warn(`Unable to add labels. Reason:${JSON.stringify(error)}`);
+            }
+            console.log(`labels added: ${prLabels.join(',')}`);
         }
         // output the actual lables.
         core.setOutput('labels', prLabels.length && prLabels.join(',') || '');
     } catch (error) {
+        console.error(`error: ${JSON.stringify(error)}`);
         core.setFailed((error as Error).message);
     }
 }
