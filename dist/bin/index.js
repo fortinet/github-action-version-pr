@@ -20805,20 +20805,25 @@ async function main() {
         // if an open pr is found, update it. otherwise, create one
         if (pullRequest) {
             console.log(`pull request (number: ${pullRequest.number}}) found. update it.`);
-            const prUpdateResponse = await octokit.pulls.update({
+            await octokit.pulls.update({
                 owner: owner,
                 repo: repo,
                 pull_number: pullRequest.number,
                 title: prTitle || undefined,
                 body: prDescription || undefined,
                 state: 'open', // reopen if prviously closed.
+            }).then(res => {
+                pullRequest = res.data;
+            })
+                .catch(error => {
+                console.error('error in octokit.pulls.create.', JSON.stringify(error));
+                throw error;
             });
-            pullRequest = prUpdateResponse.data;
         }
         // create a pr with the above title and description.
         else {
             console.log(`pull request not found. create one.`);
-            const prCreateResponse = await octokit.pulls.create({
+            await octokit.pulls.create({
                 owner: owner,
                 repo: repo,
                 head: headBranch,
@@ -20826,12 +20831,17 @@ async function main() {
                 title: prTitle || undefined,
                 body: prDescription || undefined,
                 draft: prCreateDraft === 'true'
+            }).then(res => {
+                pullRequest = res.data;
+            })
+                .catch(error => {
+                console.error('error in octokit.pulls.create.', JSON.stringify(error));
+                throw error;
             });
-            pullRequest = prCreateResponse.data;
         }
-        console.log(`new pull request (number: ${pullRequest.number}) created.`);
-        core.setOutput('pull-request-number', pullRequest.number);
-        core.setOutput('pull-request-url', pullRequest.url);
+        console.log(`new pull request (number: ${pullRequest && pullRequest.number}) created.`);
+        core.setOutput('pull-request-number', pullRequest && pullRequest.number);
+        core.setOutput('pull-request-url', pullRequest && pullRequest.url);
         // add assignee if needed
         const assignees = [];
         if (prAssignees.length) {
