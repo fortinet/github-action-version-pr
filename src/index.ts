@@ -199,7 +199,6 @@ async function main(): Promise<void> {
         // create a pr with the above title and description.
         else {
             console.log(`pull request not found. create one.`);
-            console.log(owner, repo, headBranch, baseBranch, prTitle, prDescription, prCreateDraft);
             await octokit.pulls.create({
                 owner: owner,
                 repo: repo,
